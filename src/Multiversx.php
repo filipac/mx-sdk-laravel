@@ -33,7 +33,7 @@ class Multiversx extends MultiversxBase
 
         $cacheStrategy = new GreedyCacheStrategy(
             new LaravelCacheStorage(Cache::store(config('cache.default'))),
-            $expiresAt->diffInSeconds(now()),
+            max(0, (int) now()->diffInSeconds($expiresAt, false)),
         );
 
         $stack->push(new CacheMiddleware($cacheStrategy),'cache');
@@ -43,7 +43,7 @@ class Multiversx extends MultiversxBase
         ]);
 
         $injectedClient = app()->bound(static::HttpClientContainerAbstract) ? app(static::HttpClientContainerAbstract) : null;
-        $client = $httpClient ?? $injectedClient;
+        $client = $httpClient ?? $injectedClient ?? $client;
 
         return NetworkProvider::api(config('multiversx.urls.api'), $client);
     }
